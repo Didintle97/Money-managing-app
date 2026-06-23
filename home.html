@@ -1,13 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Money Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,700;8..60,900&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  
-  
+  <!-- Navigation -->
+  <nav class="top-nav">
+    <a href="home.html" class="nav-brand"><i class="fa-solid fa-wallet"></i> Money Manager</a>
+    <div class="nav-links">
+      <a href="home.html" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+      <a href="userData.html"><i class="fa-solid fa-plus"></i> Add Data</a>
+      <a href="login.html" id="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+  </nav>
+
+  <div class="content">
+
+    <!-- Welcome Header -->
+    <div class="mb-2 animate-in">
+      <h1 id="welcome-msg">Welcome back 👋</h1>
+      <p class="text-muted" style="font-size:1.1rem;">Here's your financial snapshot. Every rand tracked is a rand controlled.</p>
+    </div>
+
+    <!-- ═══ STAT CARDS ═══ -->
+    <!--
+      💡 DIDINTLE: These cards show totals calculated from localStorage.
+      The JavaScript below reads your saved income/expense arrays and sums them up.
+    -->
+    <div class="stat-grid mb-2 reveal">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: var(--income-bg); color: var(--income);"><i class="fa-solid fa-arrow-trend-up"></i></div>
+        <div class="stat-value" id="total-income">R0</div>
+        <div class="stat-label">Total Income</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: var(--expense-bg); color: var(--expense);"><i class="fa-solid fa-arrow-trend-down"></i></div>
+        <div class="stat-value" id="total-expenses">R0</div>
+        <div class="stat-label">Total Expenses</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: var(--accent-bg); color: var(--accent);"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="stat-value" id="balance">R0</div>
+        <div class="stat-label">Balance</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(251,191,36,0.12); color: var(--warning);"><i class="fa-solid fa-receipt"></i></div>
+        <div class="stat-value" id="tx-count">0</div>
+        <div class="stat-label">Transactions</div>
+      </div>
+    </div>
+
+    <!-- ═══ CHARTS ═══ -->
+    <!--
+      💡 DIDINTLE: Chart.js renders the canvas elements into visual charts.
+      We create TWO charts:
+      1. Doughnut chart — income vs expenses proportion
+      2. Bar chart — each item's amount side by side
+    -->
+    <div style="display:grid; gap:1.25rem; margin-bottom:2rem;" class="reveal">
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-body">
+          <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Income vs Expenses</h2>
+          <div style="display:grid; gap:1.5rem; align-items:center;" id="chart-grid">
+            <div class="chart-wrap" style="max-width:280px; margin:0 auto;">
+              <canvas id="doughnut-chart"></canvas>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="bar-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ RECENT TRANSACTIONS ═══ -->
+    <div class="card mb-2 reveal">
+      <div class="card-body">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h2 class="section-title" style="margin-bottom:0;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Transactions</h2>
+          <a href="userData.html" class="btn btn-ghost" style="padding:0.5rem 1rem;font-size:0.85rem;">
+            <i class="fa-solid fa-plus"></i> Add New
+          </a>
+        </div>
+        <ul class="tx-list" id="tx-list">
+          <li class="tx-item" style="justify-content:center; color:var(--text-muted);">
+            <span>No transactions yet. <a href="userData.html">Add your first one →</a></span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;" class="reveal">
+      <a href="userData.html" class="btn btn-income"><i class="fa-solid fa-plus"></i> Add Income</a>
+      <a href="userData.html" class="btn btn-expense"><i class="fa-solid fa-minus"></i> Add Expense</a>
+      <button class="btn btn-ghost" onclick="clearAllData()"><i class="fa-solid fa-trash"></i> Clear All Data</button>
+    </div>
+
+  </div>
+
+  <footer class="site-footer">
+    <p>Built with 💜 by Didintle · Kopano Labs · 100 Days Solana Challenge (MLH)</p>
+  </footer>
+
+  <!--
+    💡 DIDINTLE: We load Chart.js from a CDN (Content Delivery Network).
+    This means we don't need to ship node_modules to production.
+    The "defer" attribute means it loads AFTER the HTML is parsed.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <script>
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * DASHBOARD LOGIC
+     *
+     * 💡 DIDINTLE: Here's the flow:
+     * 1. Read income & expense arrays from localStorage
+     * 2. Calculate totals
+     * 3. Update the stat cards with those totals
+     * 4. Build the transaction list
+     * 5. Render Chart.js charts
+     *
+     * KEY FIX from your original code:
+     * - Your original `addExpenseData` reset expenseData = [] on every call
+     *   which meant only the LAST expense was ever saved.
+     * - We now use ONE unified array called 'mm_transactions' that stores
+     *   BOTH income and expenses with a 'type' field to tell them apart.
+     * ═══════════════════════════════════════════════════════════
+     */
+
+    // Wait for everything (including Chart.js) to load
+    window.addEventListener('load', function() {
+
+      // ── Greet the user ──
+      const user = JSON.parse(localStorage.getItem('mm_user') || '{}');
+      if (user.name) {
+        document.getElementById('welcome-msg').textContent = `Welcome back, ${user.name} 👋`;
+      }
+
+      // ── Load transactions ──
+      /**
+       * 💡 DIDINTLE: We use ONE array for all transactions.
+       * Each transaction looks like:
+       * { type: 'income', name: 'Salary', amount: 5000, date: '2026-06-23' }
+       * { type: 'expense', name: 'Rent', amount: 2500, date: '2026-06-23' }
+       */
+      const transactions = JSON.parse(localStorage.getItem('mm_transactions') || '[]');
+
+      // ── Calculate totals ──
+      const incomeItems = transactions.filter(t => t.type === 'income');
+      const expenseItems = transactions.filter(t => t.type === 'expense');
+      const totalIncome = incomeItems.reduce((sum, t) => sum + Number(t.amount), 0);
+      const totalExpenses = expenseItems.reduce((sum, t) => sum + Number(t.amount), 0);
+      const balance = totalIncome - totalExpenses;
+
+      // ── Update stat cards ──
+      /**
+       * 💡 DIDINTLE: .toLocaleString() adds commas for readability.
+       * R1000 becomes R1,000. R1000000 becomes R1,000,000.
+       */
+      document.getElementById('total-income').textContent = `R${totalIncome.toLocaleString()}`;
+      document.getElementById('total-expenses').textContent = `R${totalExpenses.toLocaleString()}`;
+      document.getElementById('balance').textContent = `R${balance.toLocaleString()}`;
+      document.getElementById('balance').style.color = balance >= 0 ? 'var(--income)' : 'var(--expense)';
+      document.getElementById('tx-count').textContent = transactions.length;
+
+      // ── Build transaction list ──
+      if (transactions.length > 0) {
+        const list = document.getElementById('tx-list');
+        // Show latest first (reverse), max 10
+        const recent = [...transactions].reverse().slice(0, 10);
+        list.innerHTML = recent.map(t => `
+          <li class="tx-item">
+            <div class="tx-left">
+              <span class="tx-dot ${t.type}"></span>
+              <span class="tx-name">${t.name}</span>
+            </div>
+            <span class="tx-amount ${t.type}">${t.type === 'income' ? '+' : '-'}R${Number(t.amount).toLocaleString()}</span>
+          </li>
+        `).join('');
+      }
+
+      // ── Chart.js ──
+      /**
+       * 💡 DIDINTLE: Chart.js needs a <canvas> element and a config object.
+       * The config has: type (doughnut/bar/line), data (labels + values), options.
+       */
+      if (typeof Chart !== 'undefined' && transactions.length > 0) {
+
+        // Chart defaults for dark mode
+        Chart.defaults.color = '#8888a4';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+        // -- Doughnut: Income vs Expenses --
+        new Chart(document.getElementById('doughnut-chart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Income', 'Expenses'],
+            datasets: [{
+              data: [totalIncome, totalExpenses],
+              backgroundColor: ['rgba(74,222,128,0.8)', 'rgba(248,113,113,0.8)'],
+              borderColor: ['rgba(74,222,128,1)', 'rgba(248,113,113,1)'],
+              borderWidth: 2,
+              hoverOffset: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '65%',
+            plugins: {
+              legend: { position: 'bottom', labels: { padding: 16, font: { size: 13, weight: 600 } } }
+            }
+          }
+        });
+
+        // -- Bar: Each transaction --
+        const allLabels = transactions.map(t => t.name);
+        const allAmounts = transactions.map(t => Number(t.amount));
+        const allColors = transactions.map(t =>
+          t.type === 'income' ? 'rgba(74,222,128,0.7)' : 'rgba(248,113,113,0.7)'
+        );
+
+        new Chart(document.getElementById('bar-chart'), {
+          type: 'bar',
+          data: {
+            labels: allLabels.slice(-8), // Last 8 entries
+            datasets: [{
+              label: 'Amount (R)',
+              data: allAmounts.slice(-8),
+              backgroundColor: allColors.slice(-8),
+              borderRadius: 8,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+
+        // Make chart grid side by side on desktop
+        document.getElementById('chart-grid').style.gridTemplateColumns = 
+          window.innerWidth > 700 ? '280px 1fr' : '1fr';
+      }
+
+      // ── Scroll reveal animation ──
+      const obs = new IntersectionObserver(e => e.forEach(x => {
+        if (x.isIntersecting) x.target.classList.add('visible');
+      }), { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    });
+
+    // ── Clear all data ──
+    function clearAllData() {
+      if (confirm('This will delete ALL your income and expense data. Are you sure?')) {
+        localStorage.removeItem('mm_transactions');
+        location.reload();
+      }
+    }
+
+    // ── Logout ──
+    document.getElementById('logout-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('mm_user');
+      window.location.href = 'login.html';
+    });
+  </script>
+
 </body>
 </html>

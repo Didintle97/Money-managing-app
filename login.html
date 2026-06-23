@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Money Manager</title>
+  <!-- 💡 DIDINTLE: Google Fonts loads premium typography from the internet -->
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,700;8..60,900&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- 💡 DIDINTLE: Font Awesome gives us icons like the lock, user, etc. -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<!-- 💡 DIDINTLE: The login-page class centers everything vertically & horizontally -->
+<body class="login-page">
+
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon"><i class="fa-solid fa-wallet"></i></div>
+      <h1>Money Manager</h1>
+      <p>Track income & expenses. Build wealth.</p>
+    </div>
+
+    <!--
+      💡 DIDINTLE: This form captures a username.
+      In a real app, you'd validate against a database.
+      For now, we just save the name to localStorage and redirect.
+    -->
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username"><i class="fa-solid fa-user"></i> Your Name</label>
+        <input
+          id="username"
+          type="text"
+          placeholder="e.g. Didintle"
+          required
+          autocomplete="name"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="pin"><i class="fa-solid fa-lock"></i> PIN (4 digits)</label>
+        <input
+          id="pin"
+          type="password"
+          inputmode="numeric"
+          pattern="[0-9]{4}"
+          maxlength="4"
+          placeholder="••••"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top: 0.5rem;">
+        <i class="fa-solid fa-right-to-bracket"></i> Enter Dashboard
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p>No account needed — data stays on your device</p>
+      <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-muted);">
+        Built with 💜 by Didintle · Kopano Labs
+      </p>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * 💡 DIDINTLE: Login flow explained:
+     * 1. User types name + PIN
+     * 2. We save the name to localStorage (so we can greet them on the dashboard)
+     * 3. We redirect to home.html (the dashboard)
+     *
+     * In a REAL app, you'd check the PIN against a hashed value.
+     * For this MVP, any 4-digit PIN works — the point is the UX pattern.
+     */
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('username').value.trim();
+      const pin = document.getElementById('pin').value;
+
+      // Validate
+      if (!name) return alert('Please enter your name');
+      if (pin.length !== 4) return alert('PIN must be 4 digits');
+
+      // Save user session
+      localStorage.setItem('mm_user', JSON.stringify({
+        name: name,
+        loginTime: new Date().toISOString()
+      }));
+
+      // Redirect to dashboard
+      window.location.href = 'home.html';
+    });
+  </script>
+
+</body>
+</html>

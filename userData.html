@@ -1,51 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-     
-   
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Data — Money Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,700;8..60,900&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
-<h1>Enter your data here</h1>
-<h2>Enter your income data here</h2>
+<body>
 
-<body> 
-    <form><!-- Income data  -->
-    <label>Income</label>
-    <input id="incomeSource" type="text" placeholder="name an income source"><br>
-    
-    <label>Income Amount</label>
-    <input id="incomeAmount" type="number" placeholder="how much does it pay?"><br>
+  <!-- Navigation -->
+  <nav class="top-nav">
+    <a href="home.html" class="nav-brand"><i class="fa-solid fa-wallet"></i> Money Manager</a>
+    <div class="nav-links">
+      <a href="home.html"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+      <a href="userData.html" class="active"><i class="fa-solid fa-plus"></i> Add Data</a>
+      <a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+  </nav>
 
-    <!-- Expense data  -->
+  <div class="content">
 
-    <button id="income" type="submit">Submit income data </button><br>
-     
+    <div class="mb-2 animate-in">
+      <h1><i class="fa-solid fa-plus-circle"></i> Add Financial Data</h1>
+      <p class="text-muted" style="font-size:1.05rem;">
+        Enter your income sources and expenses below. Everything saves to your device — no cloud, no server.
+      </p>
+    </div>
 
-     <div id="msg">
-        <pre>
+    <!-- ═══ TWO-COLUMN FORMS ═══ -->
+    <div style="display:grid; gap:1.5rem; margin-bottom:2rem;" id="forms-grid">
 
-        </pre>
-     </div>
+      <!-- ── INCOME FORM ── -->
+      <!--
+        💡 DIDINTLE: KEY FIX — Your original code had TWO problems:
+        1. Both forms used document.querySelector('form') which ALWAYS selects
+           the FIRST form. Now each form has its own ID.
+        2. incomeData was a module-level array but expenseData was reset to []
+           on every call. Now we use ONE unified 'mm_transactions' array.
+      -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="section-title" style="color: var(--income);">
+            <i class="fa-solid fa-arrow-trend-up"></i> Add Income
+          </h2>
+          <form id="income-form">
+            <div class="form-group">
+              <label for="incomeSource">Income Source</label>
+              <input id="incomeSource" type="text" placeholder="e.g. Salary, Freelance, Side hustle" required />
+            </div>
+            <div class="form-group">
+              <label for="incomeAmount">Amount (Rands)</label>
+              <input id="incomeAmount" type="number" min="0" step="0.01" placeholder="e.g. 5000" required />
+            </div>
+            <button type="submit" class="btn btn-income btn-full">
+              <i class="fa-solid fa-plus"></i> Add Income
+            </button>
+          </form>
+          <!-- 💡 DIDINTLE: This message shows AFTER a successful submit -->
+          <p class="text-center text-muted" id="income-msg" style="margin-top:0.75rem; display:none;">
+            <i class="fa-solid fa-check-circle" style="color:var(--income);"></i> Income added!
+          </p>
+        </div>
+      </div>
 
-     <h2>Enter your expense data here</h2>
+      <!-- ── EXPENSE FORM ── -->
+      <div class="card">
+        <div class="card-body">
+          <h2 class="section-title" style="color: var(--expense);">
+            <i class="fa-solid fa-arrow-trend-down"></i> Add Expense
+          </h2>
+          <form id="expense-form">
+            <div class="form-group">
+              <label for="expenseName">Expense Name</label>
+              <input id="expenseName" type="text" placeholder="e.g. Rent, Groceries, Transport" required />
+            </div>
+            <div class="form-group">
+              <label for="expenseAmount">Amount (Rands)</label>
+              <input id="expenseAmount" type="number" min="0" step="0.01" placeholder="e.g. 2500" required />
+            </div>
+            <button type="submit" class="btn btn-expense btn-full">
+              <i class="fa-solid fa-minus"></i> Add Expense
+            </button>
+          </form>
+          <p class="text-center text-muted" id="expense-msg" style="margin-top:0.75rem; display:none;">
+            <i class="fa-solid fa-check-circle" style="color:var(--expense);"></i> Expense added!
+          </p>
+        </div>
+      </div>
 
-     <label>Expense Name</label>
-    <input id="expenseName" type="text" placeholder="name an income source"><br>
-    
-    <label>Expense Amount</label>
-    <input id="expenseAmount" type="number" placeholder="how much does it pay?"><br>
-     <button id="expenses" type="submit">Submit expense data </button><br>
+    </div>
 
-     <div id="exp">
-        <pre>
+    <!-- ═══ LIVE PREVIEW ═══ -->
+    <!--
+      💡 DIDINTLE: This replaces your original <pre> JSON dump.
+      Instead of showing raw JSON, we show a styled list of transactions.
+      The data is LIVE — as you add items, this list updates instantly.
+    -->
+    <div class="card mb-2 reveal">
+      <div class="card-body">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h2 class="section-title" style="margin-bottom:0;"><i class="fa-solid fa-database"></i> All Transactions</h2>
+          <span class="text-muted" id="tx-total-label">0 entries</span>
+        </div>
+        <ul class="tx-list" id="tx-list">
+          <li class="tx-item" style="justify-content:center; color:var(--text-muted);">
+            <span>No data yet. Use the forms above to add income or expenses.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
 
-        </pre>
-     </div>
-     </form>
+    <!-- Navigation buttons -->
+    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;" class="reveal">
+      <a href="home.html" class="btn btn-primary"><i class="fa-solid fa-chart-pie"></i> View Dashboard & Charts</a>
+      <button class="btn btn-ghost" onclick="clearAll()"><i class="fa-solid fa-trash"></i> Clear All Data</button>
+    </div>
 
-     <script src="scripts.js"></script>
+  </div>
+
+  <footer class="site-footer">
+    <p>Built with 💜 by Didintle · Kopano Labs · 100 Days Solana Challenge (MLH)</p>
+  </footer>
+
+  <script>
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * DATA ENTRY LOGIC (scripts.js replacement)
+     *
+     * 💡 DIDINTLE: Here's what changed from your original code:
+     *
+     * BEFORE (your code):
+     *   - Two separate arrays (incomeData, expenseData)
+     *   - expenseData = [] on every call (BUG: lost previous entries)
+     *   - localStorage.setItem overwrote with only the LAST item
+     *   - Both handlers used document.querySelector('form') (always first form)
+     *
+     * AFTER (fixed):
+     *   - ONE unified array: mm_transactions
+     *   - Each entry has { type, name, amount, date }
+     *   - We READ the existing array, PUSH new item, SAVE back
+     *   - Each form has its own ID so handlers are independent
+     *
+     * This is the SINGLE most important fix: you must READ → MODIFY → WRITE
+     * to localStorage, never just WRITE (which overwrites everything).
+     * ═══════════════════════════════════════════════════════════
+     */
+
+    // ── Helper: Get all transactions from localStorage ──
+    function getTransactions() {
+      return JSON.parse(localStorage.getItem('mm_transactions') || '[]');
+    }
+
+    // ── Helper: Save transactions to localStorage ──
+    function saveTransactions(txs) {
+      localStorage.setItem('mm_transactions', JSON.stringify(txs));
+    }
+
+    // ── Helper: Refresh the displayed list ──
+    function refreshList() {
+      const txs = getTransactions();
+      const list = document.getElementById('tx-list');
+      const label = document.getElementById('tx-total-label');
+
+      label.textContent = `${txs.length} ${txs.length === 1 ? 'entry' : 'entries'}`;
+
+      if (txs.length === 0) {
+        list.innerHTML = `<li class="tx-item" style="justify-content:center; color:var(--text-muted);"><span>No data yet.</span></li>`;
+        return;
+      }
+
+      // Show latest first
+      list.innerHTML = [...txs].reverse().map((t, i) => `
+        <li class="tx-item">
+          <div class="tx-left">
+            <span class="tx-dot ${t.type}"></span>
+            <span class="tx-name">${t.name}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="tx-amount ${t.type}">${t.type === 'income' ? '+' : '-'}R${Number(t.amount).toLocaleString()}</span>
+            <button onclick="deleteTransaction(${txs.length - 1 - i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.85rem;" title="Delete">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    // ── Delete a single transaction ──
+    function deleteTransaction(index) {
+      const txs = getTransactions();
+      txs.splice(index, 1);
+      saveTransactions(txs);
+      refreshList();
+    }
+
+    // ── Flash a success message ──
+    function flashMsg(id) {
+      const el = document.getElementById(id);
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 2000);
+    }
+
+    // ═══ INCOME FORM HANDLER ═══
+    document.getElementById('income-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('incomeSource').value.trim();
+      const amount = document.getElementById('incomeAmount').value;
+
+      if (!name || !amount) return;
+
+      // READ existing → ADD new → SAVE back
+      const txs = getTransactions();
+      txs.push({
+        type: 'income',
+        name: name,
+        amount: Number(amount),
+        date: new Date().toISOString()
+      });
+      saveTransactions(txs);
+
+      // Reset form & show confirmation
+      this.reset();
+      flashMsg('income-msg');
+      refreshList();
+    });
+
+    // ═══ EXPENSE FORM HANDLER ═══
+    document.getElementById('expense-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('expenseName').value.trim();
+      const amount = document.getElementById('expenseAmount').value;
+
+      if (!name || !amount) return;
+
+      // READ existing → ADD new → SAVE back
+      const txs = getTransactions();
+      txs.push({
+        type: 'expense',
+        name: name,
+        amount: Number(amount),
+        date: new Date().toISOString()
+      });
+      saveTransactions(txs);
+
+      this.reset();
+      flashMsg('expense-msg');
+      refreshList();
+    });
+
+    // ═══ CLEAR ALL ═══
+    function clearAll() {
+      if (confirm('Delete ALL income and expense data?')) {
+        localStorage.removeItem('mm_transactions');
+        refreshList();
+      }
+    }
+
+    // ── Make forms side-by-side on desktop ──
+    if (window.innerWidth > 700) {
+      document.getElementById('forms-grid').style.gridTemplateColumns = '1fr 1fr';
+    }
+
+    // ── Scroll reveal ──
+    const obs = new IntersectionObserver(e => e.forEach(x => {
+      if (x.isIntersecting) x.target.classList.add('visible');
+    }), { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+    // ── Initial load ──
+    refreshList();
+  </script>
+
 </body>
-
 </html>

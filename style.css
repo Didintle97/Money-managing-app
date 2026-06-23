@@ -1,21 +1,260 @@
-.card {
-    width: 200px;
-    background-color: red;
-    border-radius: 8px;
-    text-align: center;
-    padding: 5px;
-    border-radius: 10px;
-    border-color: red;
+/* ═══════════════════════════════════════════════════════════════
+   MONEY MANAGER — Design System (style.css)
+   
+   💡 DIDINTLE: This file controls ALL the visual styling.
+   Key concepts:
+   - CSS Variables (:root) = your color palette. Change once, updates everywhere.
+   - Mobile-first: styles work on phone first, @media makes it wider for desktop.
+   - BEM-ish naming: .card, .card-body, .card-title = predictable structure.
+   ═══════════════════════════════════════════════════════════════ */
 
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* 💡 DIDINTLE: Change these variables to restyle the ENTIRE app */
+  --bg: #0f0f14;
+  --bg-card: #1a1a24;
+  --bg-card-hover: #22222e;
+  --border: rgba(255,255,255,0.08);
+  --border-focus: #7c6df0;
+  --text: #e4e4ef;
+  --text-muted: #8888a4;
+  --text-heading: #f4f4ff;
+
+  /* Accent colors — finance-themed */
+  --income: #4ade80;       /* Green = money in */
+  --income-bg: rgba(74,222,128,0.12);
+  --expense: #f87171;      /* Red = money out */
+  --expense-bg: rgba(248,113,113,0.12);
+  --accent: #7c6df0;       /* Purple = brand */
+  --accent-bg: rgba(124,109,240,0.12);
+  --accent-bright: #a594ff;
+  --warning: #fbbf24;
+
+  /* Typography */
+  --serif: "Source Serif 4", Georgia, serif;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+
+  /* Spacing */
+  --radius: 16px;
+  --radius-sm: 10px;
 }
-.heading {
-    
-    background-color: red;
-    border-radius: 5px;
-    width: auto;
-    height: 50px;
-    
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  /* 💡 DIDINTLE: This SVG creates the subtle grain texture on the background */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
-.top{
-    font-family: 'Courier New', Courier, monospace;
+
+a { color: var(--accent-bright); text-decoration: none; font-weight: 600; }
+a:hover { text-decoration: underline; }
+
+/* ── Typography ── */
+h1, h2, h3 { font-family: var(--serif); color: var(--text-heading); line-height: 1.2; }
+h1 { font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 900; }
+h2 { font-size: 1.5rem; font-weight: 700; }
+h3 { font-size: 1.2rem; font-weight: 700; }
+
+/* ── Navigation ── */
+.top-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(15,15,20,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.85rem clamp(1.25rem, 4vw, 2.5rem);
+  display: flex; align-items: center; justify-content: space-between;
 }
+.nav-brand {
+  font-family: var(--serif); font-size: 1.15rem; font-weight: 700;
+  color: var(--text-heading); text-decoration: none;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.nav-links { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.nav-links a {
+  color: var(--text-muted); font-size: 0.9rem; font-weight: 600;
+  padding: 0.45rem 0.85rem; border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+.nav-links a:hover, .nav-links a.active {
+  background: var(--accent-bg); color: var(--text-heading); text-decoration: none;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.8rem 1.4rem; border-radius: 14px;
+  font-weight: 700; font-size: 1rem; font-family: var(--sans);
+  text-decoration: none; border: none; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn:hover { transform: translateY(-2px); text-decoration: none; }
+.btn-primary {
+  background: linear-gradient(135deg, #6a5ae0, var(--accent-bright));
+  color: #fff; box-shadow: 0 6px 20px rgba(124,109,240,0.35);
+}
+.btn-income {
+  background: linear-gradient(135deg, #22a55a, var(--income));
+  color: #0f2818; box-shadow: 0 6px 20px rgba(74,222,128,0.3);
+}
+.btn-expense {
+  background: linear-gradient(135deg, #dc2626, #f87171);
+  color: #fff; box-shadow: 0 6px 20px rgba(248,113,113,0.3);
+}
+.btn-ghost {
+  background: rgba(255,255,255,0.05); color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-full { width: 100%; justify-content: center; }
+
+/* ── Cards ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+.card:hover {
+  border-color: rgba(124,109,240,0.2);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+}
+.card-body { padding: 1.5rem; }
+
+/* ── Forms ── */
+/* 💡 DIDINTLE: Form styling — notice how we use :focus to change the border */
+.form-group { margin-bottom: 1.15rem; }
+.form-group label {
+  display: block; font-size: 0.9rem; font-weight: 600;
+  color: var(--text-muted); margin-bottom: 0.4rem;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 0.8rem 1rem; border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: rgba(255,255,255,0.03); color: var(--text);
+  font-family: var(--sans); font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(124,109,240,0.15);
+}
+.form-group input::placeholder { color: var(--text-muted); opacity: 0.6; }
+
+/* ── Stat Badges ── */
+.stat-grid {
+  display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem; text-align: center;
+}
+.stat-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin: 0 auto 0.75rem;
+}
+.stat-value {
+  font-family: var(--serif); font-size: 2rem; font-weight: 900;
+  color: var(--text-heading); line-height: 1;
+}
+.stat-label {
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-muted); margin-top: 0.35rem;
+}
+
+/* ── Transaction List ── */
+.tx-list { list-style: none; }
+.tx-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.tx-item:last-child { border-bottom: none; }
+.tx-left { display: flex; align-items: center; gap: 0.75rem; }
+.tx-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.tx-dot.income { background: var(--income); box-shadow: 0 0 8px rgba(74,222,128,0.4); }
+.tx-dot.expense { background: var(--expense); box-shadow: 0 0 8px rgba(248,113,113,0.4); }
+.tx-name { font-weight: 600; color: var(--text); }
+.tx-amount { font-family: var(--serif); font-weight: 700; font-size: 1.1rem; }
+.tx-amount.income { color: var(--income); }
+.tx-amount.expense { color: var(--expense); }
+
+/* ── Chart Container ── */
+.chart-wrap {
+  position: relative;
+  max-height: 300px;
+  padding: 1rem;
+}
+
+/* ── Footer ── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem; text-align: center;
+  font-size: 0.85rem; color: var(--text-muted);
+  margin-top: 3rem;
+}
+
+/* ── Utilities ── */
+.content { max-width: 960px; margin: 0 auto; padding: 2rem clamp(1rem, 4vw, 2rem); }
+.section-title { margin-bottom: 1.25rem; }
+.section-title::before {
+  content: ""; display: block; width: 2.5rem; height: 4px;
+  background: var(--accent); margin-bottom: 0.65rem; border-radius: 2px;
+}
+.mb-1 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 2rem; }
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }
+
+/* ── Animations ── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@keyframes fade-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fade-in 0.6s ease forwards; }
+
+/* ── Login-specific ── */
+.login-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 30% 20%, rgba(124,109,240,0.08), transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(74,222,128,0.06), transparent 50%),
+              var(--bg);
+}
+.login-card {
+  width: min(420px, 92vw);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2.5rem;
+  animation: fade-in 0.8s ease forwards;
+}
+.login-logo {
+  text-align: center; margin-bottom: 2rem;
+}
+.login-logo-icon {
+  width: 64px; height: 64px; border-radius: 20px;
+  background: var(--accent-bg); border: 1px solid rgba(124,109,240,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; margin: 0 auto 1rem;
+}
+.login-logo h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+.login-logo p { color: var(--text-muted); font-size: 0.95rem; }
+
+.login-footer { text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted); }
