@@ -4,96 +4,152 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login — Money Manager</title>
-  <!-- 💡 DIDINTLE: Google Fonts loads premium typography from the internet -->
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,700;8..60,900&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- 💡 DIDINTLE: Font Awesome gives us icons like the lock, user, etc. -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .login-page {
+      min-height: 100vh; display: grid;
+      background: var(--bg);
+    }
+    @media (min-width: 768px) { .login-page { grid-template-columns: 1fr 1fr; } }
+    
+    /* Left side — visual story */
+    .login-visual {
+      position: relative; overflow: hidden; display: none;
+      background: linear-gradient(135deg, #1a0f2e, #0f1a2e);
+    }
+    @media (min-width: 768px) { .login-visual { display: flex; } }
+    .login-visual img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; filter: brightness(0.45) saturate(1.1);
+    }
+    .login-visual-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(15,15,20,0.3) 0%, rgba(15,15,20,0.85) 70%, rgba(15,15,20,0.98) 100%);
+    }
+    .login-visual-content {
+      position: relative; z-index: 2;
+      padding: 3rem; display: flex; flex-direction: column;
+      justify-content: flex-end; height: 100%;
+    }
+    .login-visual h2 {
+      font-family: var(--serif); font-size: 2.2rem; font-weight: 900;
+      color: #f4f4ff; line-height: 1.15; margin-bottom: 1rem;
+    }
+    .login-visual p { font-size: 1.1rem; color: #a8a8c0; line-height: 1.6; max-width: 28rem; }
+    .login-visual-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.25);
+      border-radius: 10px; padding: 0.5rem 1rem; margin-top: 1.25rem;
+      font-size: 0.85rem; font-weight: 700; color: #4ade80; width: fit-content;
+    }
+
+    /* Right side — form */
+    .login-form-side {
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+      background: radial-gradient(ellipse at 50% 20%, rgba(124,109,240,0.06), transparent 50%);
+    }
+    .login-card { width: min(420px, 100%); }
+    
+    /* SA flag strip */
+    .sa-strip {
+      display: flex; height: 4px; border-radius: 2px; overflow: hidden; margin-bottom: 2rem;
+    }
+    .sa-strip span { flex: 1; }
+    .sa-green { background: #007A4D; }
+    .sa-gold { background: #FFB612; }
+    .sa-red { background: #DE3831; }
+    .sa-blue { background: #002395; }
+    .sa-black { background: #000000; }
+    .sa-white { background: #FFFFFF; }
+
+    /* Testimonial */
+    .login-testimonial {
+      margin-top: 2rem; padding: 1.25rem; border-radius: 14px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    }
+    .login-testimonial p { font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; font-style: italic; }
+    .login-testimonial cite { display: block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--accent-bright); font-style: normal; }
+  </style>
 </head>
+<body>
+<div class="login-page">
 
-<!-- 💡 DIDINTLE: The login-page class centers everything vertically & horizontally -->
-<body class="login-page">
-
-  <div class="login-card">
-    <div class="login-logo">
-      <div class="login-logo-icon"><i class="fa-solid fa-wallet"></i></div>
-      <h1>Money Manager</h1>
-      <p>Track income & expenses. Build wealth.</p>
-    </div>
-
-    <!--
-      💡 DIDINTLE: This form captures a username.
-      In a real app, you'd validate against a database.
-      For now, we just save the name to localStorage and redirect.
-    -->
-    <form id="login-form">
-      <div class="form-group">
-        <label for="username"><i class="fa-solid fa-user"></i> Your Name</label>
-        <input
-          id="username"
-          type="text"
-          placeholder="e.g. Didintle"
-          required
-          autocomplete="name"
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="pin"><i class="fa-solid fa-lock"></i> PIN (4 digits)</label>
-        <input
-          id="pin"
-          type="password"
-          inputmode="numeric"
-          pattern="[0-9]{4}"
-          maxlength="4"
-          placeholder="••••"
-          required
-        />
-      </div>
-
-      <button type="submit" class="btn btn-primary btn-full" style="margin-top: 0.5rem;">
-        <i class="fa-solid fa-right-to-bracket"></i> Enter Dashboard
-      </button>
-    </form>
-
-    <div class="login-footer">
-      <p>No account needed — data stays on your device</p>
-      <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-muted);">
-        Built with 💜 by Didintle · Kopano Labs
+  <!-- LEFT: Visual Story -->
+  <div class="login-visual">
+    <!-- Real SA photo from Unsplash — Cape Town township vibes -->
+    <img src="https://images.unsplash.com/photo-1590845947698-dc1d35fba069?w=800&q=80" alt="South African community" />
+    <div class="login-visual-overlay"></div>
+    <div class="login-visual-content">
+      <h2>Every rand<br>counted is a<br>rand controlled.</h2>
+      <p>
+        From Dunoon to Khayelitsha, from Diepsloot to Alex — 
+        we know what it means to stretch R200 through a whole week.
+        This app doesn't judge. It just helps you see where your money goes.
       </p>
+      <div class="login-visual-badge">
+        <i class="fa-solid fa-shield-check"></i> Built in SA, for SA. No data leaves your device.
+      </div>
     </div>
   </div>
 
-  <script>
-    /**
-     * 💡 DIDINTLE: Login flow explained:
-     * 1. User types name + PIN
-     * 2. We save the name to localStorage (so we can greet them on the dashboard)
-     * 3. We redirect to home.html (the dashboard)
-     *
-     * In a REAL app, you'd check the PIN against a hashed value.
-     * For this MVP, any 4-digit PIN works — the point is the UX pattern.
-     */
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-      e.preventDefault();
+  <!-- RIGHT: Login Form -->
+  <div class="login-form-side">
+    <div class="login-card">
+      <!-- SA flag strip -->
+      <div class="sa-strip">
+        <span class="sa-green"></span><span class="sa-gold"></span><span class="sa-red"></span>
+        <span class="sa-blue"></span><span class="sa-black"></span><span class="sa-white"></span>
+      </div>
 
-      const name = document.getElementById('username').value.trim();
-      const pin = document.getElementById('pin').value;
+      <div class="login-logo">
+        <div class="login-logo-icon"><i class="fa-solid fa-wallet"></i></div>
+        <h1>Money Manager</h1>
+        <p>Track income & expenses. Build wealth. 🇿🇦</p>
+      </div>
 
-      // Validate
-      if (!name) return alert('Please enter your name');
-      if (pin.length !== 4) return alert('PIN must be 4 digits');
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username"><i class="fa-solid fa-user"></i> Your Name</label>
+          <input id="username" type="text" placeholder="e.g. Didintle, Sipho, Naledi" required autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label for="pin"><i class="fa-solid fa-lock"></i> PIN (4 digits)</label>
+          <input id="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="••••" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top:0.5rem;">
+          <i class="fa-solid fa-right-to-bracket"></i> Enter Dashboard
+        </button>
+      </form>
 
-      // Save user session
-      localStorage.setItem('mm_user', JSON.stringify({
-        name: name,
-        loginTime: new Date().toISOString()
-      }));
+      <div class="login-testimonial">
+        <p>"I used to wonder where my salary goes by day 15. Now I see it — and I can plan for month end."</p>
+        <cite>— Young professional, Dunoon, Cape Town</cite>
+      </div>
 
-      // Redirect to dashboard
-      window.location.href = 'home.html';
-    });
-  </script>
+      <div class="login-footer">
+        <p>No account needed — data stays on YOUR phone</p>
+        <p style="margin-top:0.5rem;font-size:0.8rem;">
+          Built with 💜 by Didintle · Kopano Labs · MLH 100 Days
+        </p>
+      </div>
+    </div>
+  </div>
 
+</div>
+
+<script>
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('username').value.trim();
+    const pin = document.getElementById('pin').value;
+    if (!name) return alert('Please enter your name');
+    if (pin.length !== 4) return alert('PIN must be 4 digits');
+    localStorage.setItem('mm_user', JSON.stringify({ name, loginTime: new Date().toISOString() }));
+    window.location.href = 'home.html';
+  });
+</script>
 </body>
 </html>

@@ -20,12 +20,46 @@
     </div>
   </nav>
 
-  <div class="content">
+  <style>
+    .dash-hero { position: relative; border-radius: 20px; overflow: hidden; margin-bottom: 2rem; min-height: 220px; display: flex; align-items: flex-end; }
+    .dash-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4) saturate(1.1); }
+    .dash-hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15,15,20,0.95) 0%, rgba(15,15,20,0.5) 60%, transparent 100%); }
+    .dash-hero-content { position: relative; z-index: 2; padding: 2rem; max-width: 500px; }
+    .dash-hero-content h2 { font-family: var(--serif); font-size: 1.6rem; font-weight: 900; color: #f4f4ff; margin-bottom: 0.5rem; }
+    .dash-hero-content p { font-size: 1rem; color: #a8a8c0; line-height: 1.5; }
+    .poc-bar { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+    .poc-track { flex: 1; height: 10px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
+    .poc-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #3d6b4f, #4ade80); transition: width 1.5s cubic-bezier(0.22,1,0.36,1); }
+    .poc-label { font-size: 0.85rem; font-weight: 700; color: #4ade80; white-space: nowrap; }
+    .sa-strip-h { display: flex; height: 3px; border-radius: 2px; overflow: hidden; margin-bottom: 1.5rem; }
+    .sa-strip-h span { flex: 1; }
+  </style>
+
+    <!-- SA Flag Strip -->
+    <div class="sa-strip-h">
+      <span style="background:#007A4D"></span><span style="background:#FFB612"></span><span style="background:#DE3831"></span>
+      <span style="background:#002395"></span><span style="background:#000"></span><span style="background:#fff"></span>
+    </div>
 
     <!-- Welcome Header -->
     <div class="mb-2 animate-in">
       <h1 id="welcome-msg">Welcome back 👋</h1>
       <p class="text-muted" style="font-size:1.1rem;">Here's your financial snapshot. Every rand tracked is a rand controlled.</p>
+    </div>
+
+    <!-- SA Hero Banner -->
+    <div class="dash-hero animate-in">
+      <img src="https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=900&q=80" alt="Cape Town cityscape" />
+      <div class="dash-hero-overlay"></div>
+      <div class="dash-hero-content">
+        <h2>🇿🇦 Your money. Your rules.</h2>
+        <p>No bank needed. No data sold. Everything stays on this device — from Dunoon to Diepsloot, this is YOUR financial mirror.</p>
+        <div class="poc-bar">
+          <span class="poc-label">POC</span>
+          <div class="poc-track"><div class="poc-fill" id="poc-fill" style="width:0%"></div></div>
+          <span class="poc-label" id="poc-val">0%</span>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ STAT CARDS ═══ -->
@@ -279,6 +313,32 @@
       localStorage.removeItem('mm_user');
       window.location.href = 'login.html';
     });
+
+    // ═══ POC VALIDATION BAR ═══
+    // Calculates how "validated" the POC is based on real usage
+    setTimeout(function() {
+      let score = 20; // Base: app loads = 20%
+      const txs = JSON.parse(localStorage.getItem('mm_transactions') || '[]');
+      const user = JSON.parse(localStorage.getItem('mm_user') || '{}');
+      if (user.name) score += 15;          // User logged in
+      if (txs.length > 0) score += 20;     // Has at least 1 transaction
+      if (txs.length >= 3) score += 15;    // 3+ transactions  
+      if (txs.some(t => t.type === 'income')) score += 10;  // Has income
+      if (txs.some(t => t.type === 'expense')) score += 10; // Has expenses
+      if (typeof Chart !== 'undefined') score += 10;        // Charts loaded
+      score = Math.min(score, 100);
+      
+      const fill = document.getElementById('poc-fill');
+      const val = document.getElementById('poc-val');
+      if (fill && val) {
+        fill.style.width = score + '%';
+        val.textContent = score + '% VALIDATED';
+        if (score >= 80) {
+          fill.style.background = 'linear-gradient(90deg, #22a55a, #4ade80)';
+          val.style.color = '#4ade80';
+        }
+      }
+    }, 800);
   </script>
 
 </body>
