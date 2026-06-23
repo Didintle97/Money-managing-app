@@ -1,0 +1,21 @@
+.card {
+    width: 200px;
+    background-color: red;
+    border-radius: 8px;
+    text-align: center;
+    padding: 5px;
+    border-radius: 10px;
+    border-color: red;
+
+}
+.heading {
+    
+    background-color: red;
+    border-radius: 5px;
+    width: auto;
+    height: 50px;
+    
+}
+.top{
+    font-family: 'Courier New', Courier, monospace;
+}
